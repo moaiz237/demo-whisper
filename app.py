@@ -66,10 +66,10 @@ def handler(context: dict, request: Request) -> Response:
     processor = context.get("processor")
 
     # download file from bucket
-    context.get("s3").download_file(context.get("bucket"), path, "sample.wav")
+    # context.get("s3").download_file(context.get("bucket"), path, "sample.wav")
 
     # open the stored file and convert to tensors
-    input_features = processor(load_audio("sample.wav"), sampling_rate=16000, return_tensors="pt").input_features.to(device)
+    # input_features = processor(load_audio("sample.wav"), sampling_rate=16000, return_tensors="pt").input_features.to(device)
 
     # run inference on the sample
     model = context.get("model")
@@ -80,7 +80,7 @@ def handler(context: dict, request: Request) -> Response:
     forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
     pipe = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor, chunk_length_s = 30, stride_length_s = 5)
     with torch.cuda.amp.autocast():
-        text = pipe(input_features, generate_kwargs={"forced_decoder_ids": forced_decoder_ids}, max_new_tokens=255)["text"]
+        text = pipe(path, generate_kwargs={"forced_decoder_ids": forced_decoder_ids}, max_new_tokens=255)["text"]
     
     # generated_ids = model.generate(inputs=input_features)
     
