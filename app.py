@@ -3,7 +3,8 @@ import torch
 import boto3
 import os
 
-from transformers import AutoProcessor, WhisperForConditionalGeneration, WhisperConfig
+from transformers import AutoProcessor, WhisperForConditionalGeneration, WhisperConfig, AutomaticSpeechRecognitionPipeline
+from peft import PeftModel, PeftConfig
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 import torchaudio
 
@@ -24,13 +25,9 @@ def init():
         model = WhisperForConditionalGeneration(peft_config.base_model_name_or_path)
     model.tie_weights()
     model = PeftModel.from_pretrained(model, peft_model_id)
-    language = "Urdu"
-    task = "transcribe"
     tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     feature_extractor = processor.feature_extractor
-    forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
-    # pipe = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor, chunk_length_s = 30, stride_length_s = 5)
     
     model = load_checkpoint_and_dispatch(
         model, "model.safetensors", device_map="auto"
@@ -51,6 +48,8 @@ def init():
         "s3": s3,
         "bucket": bucket,
         "processor": processor,
+        "feature_extractor":feature_extractor,
+        "tokenizer":tokenizer,
     }
 
     return context
@@ -72,14 +71,24 @@ def handler(context: dict, request: Request) -> Response:
 
     # run inference on the sample
     model = context.get("model")
-    generated_ids = model.generate(inputs=input_features)
+    tokenizer = context.get("tokenizer")
+    feature_extractor = context.get("feature_extractor")
+    language = "Urdu"
+    task = "transcribe"
+    forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
+    pipe = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor, chunk_length_s = 30, stride_length_s = 5)
+    with torch.cuda.amp.autocast():
+        text = pipe(input_features, generate_kwargs={"forced_decoder_ids": forced_decoder_ids}, max_new_tokens=255)["text"]
     
-    # convert the generated ids back to text
-    transcription = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    # generated_ids = model.generate(inputs=input_features)
+    
+    # # convert the generated ids back to text
+    # transcription = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    
 
     # return output JSON to the client
     return Response(
-        json = {"outputs": transcription}, 
+        json = {"outputs": text}, 
         status=200
     )
 
