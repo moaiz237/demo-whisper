@@ -18,13 +18,8 @@ def download_model():
     # model = WhisperForConditionalGeneration.from_pretrained("Moaiz/whisper-fine-tune-LoRA-roman-urdu-add-2")
 
     peft_model_id = "Moaiz/whisper-fine-tune-LoRA-roman-urdu-add-2" # Use the same model ID as before.
-    language = "Urdu"
-    task = "transcribe"
     peft_config = PeftConfig.from_pretrained(peft_model_id)
     model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path)
-    model = PeftModel.from_pretrained(model, peft_model_id, token = "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")
-    tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
-    processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     custom_save(model)
 
 if __name__ == "__main__":
