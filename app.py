@@ -31,9 +31,9 @@ def init():
     processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     feature_extractor = processor.feature_extractor
     
-    model = load_checkpoint_and_dispatch(
-        model, "model.safetensors", device_map="auto"
-    )
+    # model = load_checkpoint_and_dispatch(
+    #     model, "model.safetensors", device_map="auto"
+    # )
 
     # set up boto3 client with credentials from environment variables
     s3 = boto3.client(
