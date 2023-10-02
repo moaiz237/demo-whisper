@@ -16,11 +16,22 @@ def init():
 
     config = WhisperConfig.from_pretrained("openai/whisper-base")
     processor = AutoProcessor.from_pretrained("openai/whisper-base")
+
+    peft_model_id = "Moaiz/whisper-fine-tune-LoRA-roman-urdu-add-2" # Use the same model ID as before.
+    peft_config = PeftConfig.from_pretrained(peft_model_id)
     
     with init_empty_weights():
-        model = WhisperForConditionalGeneration(config)
+        model = WhisperForConditionalGeneration(peft_config.base_model_name_or_path)
     model.tie_weights()
-
+    model = PeftModel.from_pretrained(model, peft_model_id)
+    language = "Urdu"
+    task = "transcribe"
+    tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
+    processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
+    feature_extractor = processor.feature_extractor
+    forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
+    # pipe = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor, chunk_length_s = 30, stride_length_s = 5)
+    
     model = load_checkpoint_and_dispatch(
         model, "model.safetensors", device_map="auto"
     )
