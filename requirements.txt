@@ -5,3 +5,6 @@ librosa
 boto3
 torchaudio
 accelerate
+peft
+bitsandbytes
+accelerate
