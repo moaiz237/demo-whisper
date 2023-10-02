@@ -14,8 +14,8 @@ app = Potassium("my_app")
 @app.init
 def init():
 
-    config = WhisperConfig.from_pretrained("openai/whisper-base")
-    processor = AutoProcessor.from_pretrained("openai/whisper-base")
+    # config = WhisperConfig.from_pretrained("openai/whisper-base")
+    # processor = AutoProcessor.from_pretrained("openai/whisper-base")
 
     peft_model_id = "Moaiz/whisper-fine-tune-LoRA-roman-urdu-add-2" # Use the same model ID as before.
     peft_config = PeftConfig.from_pretrained(peft_model_id)
