@@ -25,6 +25,8 @@ def init():
         model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path)
     model.tie_weights()
     model = PeftModel.from_pretrained(model, peft_model_id)
+    language = "Urdu"
+    task = "transcribe"
     tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
     feature_extractor = processor.feature_extractor
