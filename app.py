@@ -3,7 +3,7 @@ import torch
 import boto3
 import os
 
-from transformers import AutoProcessor, WhisperForConditionalGeneration, WhisperConfig, AutomaticSpeechRecognitionPipeline
+from transformers import AutoProcessor, WhisperForConditionalGeneration, WhisperConfig, AutomaticSpeechRecognitionPipeline, WhisperTokenizer, WhisperProcessor
 from peft import PeftModel, PeftConfig
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 import torchaudio
