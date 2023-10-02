@@ -22,7 +22,7 @@ def init():
     peft_config = PeftConfig.from_pretrained(peft_model_id)
     
     with init_empty_weights():
-        model = WhisperForConditionalGeneration(peft_config.base_model_name_or_path)
+        model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path)
     model.tie_weights()
     model = PeftModel.from_pretrained(model, peft_model_id)
     tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
