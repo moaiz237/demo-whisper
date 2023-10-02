@@ -22,7 +22,7 @@ def init():
     peft_config = PeftConfig.from_pretrained(peft_model_id)
     
     with init_empty_weights():
-        model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path)
+        model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
     model.tie_weights()
     model = PeftModel.from_pretrained(model, peft_model_id)
     language = "Urdu"
@@ -73,6 +73,7 @@ def handler(context: dict, request: Request) -> Response:
 
     # run inference on the sample
     model = context.get("model")
+    model.to(device)
     tokenizer = context.get("tokenizer")
     feature_extractor = context.get("feature_extractor")
     language = "Urdu"
